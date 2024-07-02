@@ -4,6 +4,10 @@
 #include <iostream>
 
 int main(void) {
+    glfwSetErrorCallback([](int code, const char* description) {
+        std::cerr << "[GLFW ERROR] " << description << std::endl;
+    });
+
     if (!glfwInit()) {
         std::cerr << "Failed to initialize glfw" << std::endl;
 
