@@ -1,6 +1,9 @@
 {
-  stdenv,
+  glew,
+  glfw,
   lib,
+  stdenv,
+  wayland,
 }:
 let
   inherit (lib) cleanSource;
@@ -10,10 +13,22 @@ in stdenv.mkDerivation (finalAttrs: {
 
   src = cleanSource ../src;
 
+  strictDeps = true;
+
+  buildInputs = [
+    glew
+    (glfw.overrideAttrs {
+      # https://github.com/NixOS/nixpkgs/commit/a4ebe70f13c1f9d422d73bfab8fdbd203d4d64b7
+      postFixup = lib.optionalString stdenv.isLinux ''
+        patchelf ''${!outputLib}/lib/libglfw.so --add-rpath ${lib.getLib wayland}/lib
+      '';
+    })
+  ];
+
   dontConfigure = true;
 
   buildPhase = ''
-    $CXX -o $pname $src/main.cc
+    $CXX -o $pname -lGL -lGLEW -lglfw $src/main.cc
   '';
 
   installPhase = ''
